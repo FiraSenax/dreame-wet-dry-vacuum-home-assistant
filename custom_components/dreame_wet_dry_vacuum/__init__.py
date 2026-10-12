@@ -70,7 +70,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: DreameWetDryConfigEntry)
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, coordinator.async_on_ha_stop)
     )
 
-    platforms = [Platform.SENSOR, Platform.BUTTON] if model == H15_MIX_MODEL else PLATFORMS
+    platforms = (
+        [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.BUTTON]
+        if model == H15_MIX_MODEL else PLATFORMS
+    )
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     return True
@@ -79,7 +82,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: DreameWetDryConfigEntry)
 async def async_unload_entry(hass: HomeAssistant, entry: DreameWetDryConfigEntry) -> bool:
     """Unload a config entry."""
     model = entry.runtime_data.device_info_raw.get("model") or entry.data.get("device_model")
-    platforms = [Platform.SENSOR, Platform.BUTTON] if model == H15_MIX_MODEL else PLATFORMS
+    platforms = (
+        [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.BUTTON]
+        if model == H15_MIX_MODEL else PLATFORMS
+    )
     unloaded = await hass.config_entries.async_unload_platforms(entry, platforms)
     if unloaded:
         coordinator = entry.runtime_data

@@ -6,6 +6,7 @@ MODEL = "H14 Pro"
 H14_PRO_MODEL = "dreame.hold.w2306e"
 H15_MIX_MODEL = "dreame.hold.w2506"
 SUPPORTED_MODELS = {H14_PRO_MODEL, H15_MIX_MODEL}
+H15_MIX_DIRTY_TANK_FULL_BIT = 4096  # Observed on this model on 2026-10-12.
 
 # These readings were observed on an H15 Mix on 2026-10-12. H14 controls and
 # warning bit definitions must not be assumed to apply to a different model.

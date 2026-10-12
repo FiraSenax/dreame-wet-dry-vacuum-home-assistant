@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import DreameWetDryConfigEntry
 from .const import H15_MIX_MODEL, KNOWN_BUTTON_PROPS
 from .entity import DreameWetDryEntity
-from .h15 import async_start_self_clean
+from .h15 import async_start_self_clean, dirty_tank_full
 
 
 async def async_setup_entry(
@@ -38,7 +38,11 @@ class DreameWetDryButton(DreameWetDryEntity, ButtonEntity):
     def available(self) -> bool:
         if self.coordinator.device_info_raw.get("model") == H15_MIX_MODEL:
             status = self.coordinator.props.get((2, 1))
-            return bool(self.coordinator.snapshot.get("online")) and status in (4, 15)
+            return (
+                bool(self.coordinator.snapshot.get("online"))
+                and status in (4, 15)
+                and not dirty_tank_full(self.coordinator)
+            )
         return super().available
 
     async def async_press(self) -> None:
