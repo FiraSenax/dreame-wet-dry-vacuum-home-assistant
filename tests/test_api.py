@@ -5,6 +5,7 @@ import json
 import pytest
 
 from custom_components.dreame_wet_dry_vacuum.api import (
+    REGION_URLS,
     DreameAPI,
     DreameAPIError,
     DreameAuthError,
@@ -12,6 +13,7 @@ from custom_components.dreame_wet_dry_vacuum.api import (
     _md5_password,
     _parse_prop_value,
 )
+from custom_components.dreame_wet_dry_vacuum.const import REGIONS
 
 TOKEN_OK = {"access_token": "token-1", "uid": "UID1", "expires_in": 7200}
 
@@ -88,6 +90,28 @@ class TestHelpers:
 
 
 class TestLogin:
+    @pytest.mark.parametrize(
+        ("region", "host"),
+        [
+            ("eu", "eu.iot.dreame.tech"),
+            ("cn", "cn.iot.dreame.tech"),
+            ("us", "us.iot.dreame.tech"),
+            ("sg", "sg.iot.dreame.tech"),
+            ("ru", "ru.iot.dreame.tech"),
+            ("in", "in.iot.dreame.tech"),
+            ("kr", "kr.iot.dreame.tech"),
+        ],
+    )
+    def test_region_selects_its_own_login_endpoint_and_rlc(self, region, host):
+        assert set(REGIONS) == set(REGION_URLS)
+        session = FakeSession(lambda url, kw: FakeResponse(200, TOKEN_OK))
+        api = DreameAPI("user", "pw", region=region, session=session)
+
+        run(api.login())
+
+        assert session.calls == [f"https://{host}:13267/dreame-auth/oauth/token"]
+        assert api._rlc == _compute_rlc(region)
+
     def test_login_success_exposes_uid_and_token(self):
         session = FakeSession(lambda url, kw: FakeResponse(200, TOKEN_OK))
         api = DreameAPI("user", "pw", session=session)
