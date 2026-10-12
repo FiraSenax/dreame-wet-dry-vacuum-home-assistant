@@ -111,6 +111,15 @@ class TestLogin:
 
 
 class TestAuthedRequests:
+    def test_get_properties_handles_null_data(self):
+        def handler(url, kwargs):
+            if "oauth/token" in url:
+                return FakeResponse(200, TOKEN_OK)
+            return FakeResponse(200, {"code": 0, "data": None})
+
+        api = DreameAPI("u", "p", session=FakeSession(handler))
+        assert run(api.get_properties("device", [{"siid": 4, "piid": 2}])) == []
+
     @pytest.mark.parametrize(
         ("command_result", "accepted"),
         [

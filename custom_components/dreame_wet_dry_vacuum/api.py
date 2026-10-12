@@ -295,7 +295,8 @@ class DreameAPI:
         }
 
         result = await self._authed_post(url, payload)
-        return result.get("data", {}).get("result", [])
+        data = result.get("data") or {}
+        return data.get("result") or []
 
     async def set_property(
         self, device_id: str, siid: int, piid: int, value: Any
