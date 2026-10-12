@@ -117,6 +117,15 @@ class TestTopic:
         client = make_client([])
         assert client.topic == "/status/-12345678/UID1/dreame.hold.w2306e/eu/"
 
+    def test_us_topic_uses_selected_region(self):
+        client = DreameMqttClient(
+            uid="UID1", access_token="token-1", device_id="-12345678",
+            model="dreame.hold.w2306e",
+            bind_domain="10000.mt.us.iot.dreame.tech:19973",
+            on_update=lambda state: None, region="us",
+        )
+        assert client.topic == "/status/-12345678/UID1/dreame.hold.w2306e/us/"
+
     def test_default_port_when_missing(self):
         client = DreameMqttClient(
             uid="u", access_token="t", device_id="d", model="m",

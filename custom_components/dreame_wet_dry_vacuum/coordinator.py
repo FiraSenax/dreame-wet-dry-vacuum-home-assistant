@@ -1,4 +1,5 @@
 """Data coordinator for Dreame wet & dry vacuum (MQTT push + HTTP seed)."""
+
 from __future__ import annotations
 
 import logging
@@ -14,6 +15,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import DreameAPI, DreameAPIError, DreameAuthError
 from .const import (
+    CONF_REGION,
     CONSUMABLE_MAX_KEYS,
     DOMAIN,
     KNOWN_BINARY_PROPS,
@@ -72,6 +74,7 @@ class DreameWetDryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.api = api
         self.device_id = device_id
         self.device_info_raw = device_info
+        self._region = entry.data.get(CONF_REGION, "eu")
         # Latest cloud snapshot (online, battery, status…), refreshed each poll
         self.snapshot: dict[str, Any] = {}
         # Live property store keyed by (siid, piid)
@@ -93,7 +96,7 @@ class DreameWetDryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def stop_polling(self) -> None:
         if self._unsub_poll:
             self._unsub_poll()
-            self._unsub_poll = None
+        self._unsub_poll = None
 
     async def _async_scheduled_poll(self, _now: datetime) -> None:
         await self.async_refresh()
@@ -120,6 +123,7 @@ class DreameWetDryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not bind:
             _LOGGER.warning("No bindDomain; MQTT disabled, HTTP polling only")
             return
+
         self.mqtt = DreameMqttClient(
             uid=self.api.uid,
             access_token=self.api.access_token,
@@ -127,6 +131,7 @@ class DreameWetDryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             model=snap.get("model", ""),
             bind_domain=bind,
             on_update=self._handle_mqtt_update,
+            region=self._region,
         )
         self.mqtt.start()
 
@@ -188,9 +193,10 @@ class DreameWetDryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self.props[(3, 1)] = snapshot["battery"]
             if snapshot.get("status") is not None:
                 self.props[(2, 1)] = snapshot["status"]
-            # Refresh MQTT credentials if the token rotated (it expires after 2 h)
-            if self.mqtt and self.api.access_token:
-                self.mqtt.update_token(self.api.access_token)
+
+        # Refresh MQTT credentials if the token rotated (it expires after 2 h)
+        if self.mqtt and self.api.access_token:
+            self.mqtt.update_token(self.api.access_token)
 
         # Read cloud-cached property values (warn/error, consumables, settings…).
         # This is what makes alerts like "dirty tank full" reliable even when MQTT
