@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import DreameAPI, DreameAuthError, DreameAPIError
+from .api import DreameAPI, DreameAPIError, DreameAuthError
 from .const import CONF_DEVICE_ID, CONF_REGION, DOMAIN, REGIONS
 
 STEP_USER_SCHEMA = vol.Schema(

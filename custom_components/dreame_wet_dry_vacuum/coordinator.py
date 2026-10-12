@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Any
@@ -16,8 +15,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import DreameAPI, DreameAPIError, DreameAuthError
 from .const import (
-    CONSUMABLE_MAX_KEYS,
     CONF_REGION,
+    CONSUMABLE_MAX_KEYS,
     DOMAIN,
     KNOWN_BINARY_PROPS,
     KNOWN_MQTT_PROPS,

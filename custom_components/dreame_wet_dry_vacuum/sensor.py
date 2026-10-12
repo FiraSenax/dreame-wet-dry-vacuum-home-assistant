@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -118,7 +122,7 @@ class DreameWetDrySensor(CoordinatorEntity[DreameWetDryCoordinator], SensorEntit
             return None
         if self._is_timestamp:
             try:
-                return datetime.fromtimestamp(int(raw), tz=timezone.utc)
+                return datetime.fromtimestamp(int(raw), tz=UTC)
             except (ValueError, TypeError, OSError):
                 return None
         if self._is_enum:
