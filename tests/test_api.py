@@ -111,6 +111,24 @@ class TestLogin:
 
 
 class TestAuthedRequests:
+    @pytest.mark.parametrize(
+        ("command_result", "accepted"),
+        [
+            ({"code": 0, "data": {"result": [{"code": 0}]}}, True),
+            ({"code": 0, "data": {"result": [{"code": 1}]}}, False),
+            ({"code": 0, "data": {"result": []}}, False),
+            ({"code": 1, "data": {"result": [{"code": 0}]}}, False),
+        ],
+    )
+    def test_set_property_requires_real_ack(self, command_result, accepted):
+        def handler(url, kwargs):
+            if "oauth/token" in url:
+                return FakeResponse(200, TOKEN_OK)
+            return FakeResponse(200, command_result)
+
+        api = DreameAPI("u", "p", session=FakeSession(handler))
+        assert run(api.set_property("device", 1, 7, 1)) is accepted
+
     def _handler(self, unauthorized_data_calls: int):
         """Token endpoint always succeeds; data endpoint 401s N times first."""
         state = {"data_calls": 0, "logins": 0}
